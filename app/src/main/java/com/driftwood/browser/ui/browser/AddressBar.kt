@@ -139,7 +139,7 @@ fun AddressBar(
                 focused && value.text.isNotEmpty() ->
                     IconBtn(Tabler.X, "Clear", { value = TextFieldValue("") }, tint = palette.subtle)
                 !focused && !tab.showHome && tab.ublockBlocked + tab.trackersBlocked > 0 ->
-                    BlockedBadge(tab.ublockBlocked + tab.trackersBlocked) { navigate(Screen.STATS) }
+                    BlockedBadge(tab.ublockBlocked + tab.trackersBlocked) { navigate(Screen.ADBLOCK) }
             }
         }
 
@@ -236,8 +236,8 @@ private fun BrowserMenu(activity: MainActivity, tab: Tab, navigate: (Screen) -> 
             MenuItem(Tabler.Bookmarks, "Bookmarks") { navigate(Screen.BOOKMARKS); open = false }
             MenuItem(Tabler.History, "History") { navigate(Screen.HISTORY); open = false }
             MenuItem(Tabler.Download, "Downloads") { navigate(Screen.DOWNLOADS); open = false }
-            MenuItem(Tabler.ShieldCheck, "Blocked: ${tab.ublockBlocked + tab.trackersBlocked} on this page") {
-                navigate(Screen.STATS); open = false
+            MenuItem(Tabler.ShieldCheck, "Ad blocking (${tab.ublockBlocked + tab.trackersBlocked} blocked here)") {
+                navigate(Screen.ADBLOCK); open = false
             }
             MenuItem(Tabler.Puzzle, "Extensions") { navigate(Screen.EXTENSIONS); open = false }
             MenuItem(Tabler.Settings, "Settings") { navigate(Screen.SETTINGS); open = false }

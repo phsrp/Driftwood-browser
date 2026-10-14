@@ -14,9 +14,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.driftwood.browser.DriftwoodApp
+import com.driftwood.browser.engine.Engine
 import com.driftwood.browser.engine.ExtensionManager
 import com.driftwood.browser.search.UrlInput
 import com.driftwood.browser.ui.common.ScreenScaffold
@@ -33,26 +37,33 @@ import com.driftwood.browser.ui.icons.Tabler
 import com.driftwood.browser.ui.theme.LocalPalette
 import java.text.NumberFormat
 
-/** How many ads and trackers were blocked: overall and on the current page. */
+/** Turn ad blocking on or off, and see how much was blocked. */
 @Composable
-fun StatsScreen(app: DriftwoodApp, onBack: () -> Unit) {
+fun AdBlockingScreen(app: DriftwoodApp, onBack: () -> Unit) {
     val stats = app.blockStats
     val palette = LocalPalette.current
+    val settings by app.settings.state.collectAsState()
     val installed by app.extensions.installed.collectAsState()
-    val ublockActive = installed.any { it.id == ExtensionManager.UBLOCK_ID && it.metaData.enabled }
+    val ublock = installed.firstOrNull { it.id == ExtensionManager.UBLOCK_ID }
     val tab = app.tabs.current
     val n = NumberFormat.getIntegerInstance()
+    LaunchedEffect(Unit) { app.extensions.refresh() }
 
-    ScreenScaffold("Blocking stats", onBack, actions = {
+    // Changes apply from the next page load, so reload the page you're on.
+    fun reloadPage() {
+        tab?.takeIf { !it.showHome }?.session?.reload()
+    }
+
+    ScreenScaffold("Ad blocking", onBack, actions = {
         TextButton(onClick = {
-            app.prompts.confirm("Reset stats?", "All counters go back to zero.", "Reset") { stats.reset() }
+            app.prompts.confirm("Reset the counters?", "All blocked counts go back to zero.", "Reset") { stats.reset() }
         }) { Text("Reset") }
     }) {
         Column(
             Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Big total
+            // Total
             Card {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TIcon(Tabler.ShieldCheck, null, tint = palette.accent)
@@ -72,24 +83,43 @@ fun StatsScreen(app: DriftwoodApp, onBack: () -> Unit) {
                 )
             }
 
+            // uBlock Origin
             Card {
-                Text("uBlock Origin", style = MaterialTheme.typography.titleMedium)
-                Text("Ads, trackers and other junk requests", style = MaterialTheme.typography.bodySmall, color = palette.subtle)
-                Spacer(Modifier.height(8.dp))
-                StatRow("Blocked", stats.ublockTotal)
-                if (!ublockActive) {
+                ToggleHeader(
+                    title = "uBlock Origin",
+                    subtitle = "Blocks ads, trackers and other junk",
+                    checked = ublock?.metaData?.enabled == true,
+                    enabled = ublock != null,
+                    onChange = { on ->
+                        ublock?.let { app.extensions.setEnabled(it, on) }
+                        reloadPage()
+                    },
+                )
+                if (ublock == null) {
                     Text(
-                        "uBlock Origin isn't active. Check Extensions.",
+                        "uBlock Origin isn't installed yet. It installs automatically when you're online, or tap below.",
                         style = MaterialTheme.typography.bodySmall,
                         color = palette.danger,
                     )
+                    TextButton(onClick = { app.extensions.install(ExtensionManager.UBLOCK_URL) }) { Text("Install uBlock Origin") }
                 }
+                Spacer(Modifier.height(4.dp))
+                StatRow("Blocked", stats.ublockTotal)
             }
 
+            // Firefox tracking protection
             Card {
-                Text("Firefox tracking protection", style = MaterialTheme.typography.titleMedium)
-                Text("Built into the engine, works even without extensions", style = MaterialTheme.typography.bodySmall, color = palette.subtle)
-                Spacer(Modifier.height(8.dp))
+                ToggleHeader(
+                    title = "Firefox tracking protection",
+                    subtitle = "Built into the engine, works even without extensions",
+                    checked = settings.trackingProtection,
+                    onChange = { on ->
+                        app.settings.update { it.copy(trackingProtection = on) }
+                        Engine.setTrackingProtection(app.runtime, on)
+                        reloadPage()
+                    },
+                )
+                Spacer(Modifier.height(4.dp))
                 StatRow("Tracking content & ads", stats.trackers)
                 StatRow("Social media trackers", stats.social)
                 StatRow("Fingerprinters", stats.fingerprinters)
@@ -107,12 +137,29 @@ fun StatsScreen(app: DriftwoodApp, onBack: () -> Unit) {
             }
 
             Text(
-                "uBlock Origin's count is read from its toolbar badge on each page, so it matches what uBlock itself reports. " +
-                    "Some requests can be blocked by both, so the total may count a few twice.",
+                "Turning either one off takes effect when the page reloads. uBlock Origin's count is read from its own " +
+                    "counter on each page. Some requests can be blocked by both, so the total may count a few twice.",
                 style = MaterialTheme.typography.bodySmall,
                 color = palette.muted,
             )
         }
+    }
+}
+
+@Composable
+private fun ToggleHeader(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit, enabled: Boolean = true) {
+    val palette = LocalPalette.current
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = palette.subtle)
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onChange,
+            enabled = enabled,
+            colors = SwitchDefaults.colors(checkedTrackColor = palette.accent, checkedThumbColor = palette.onAccent),
+        )
     }
 }
 

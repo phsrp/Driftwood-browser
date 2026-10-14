@@ -1,6 +1,7 @@
 package com.driftwood.browser.ui.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,11 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.driftwood.browser.DriftwoodApp
+import com.driftwood.browser.R
 import com.driftwood.browser.data.Shortcut
 import com.driftwood.browser.search.UrlInput
 import com.driftwood.browser.ui.common.LetterBadge
@@ -60,7 +63,7 @@ fun HomeScreen(app: DriftwoodApp, isPrivate: Boolean, onOpen: (String) -> Unit) 
             .padding(horizontal = 24.dp, vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(32.dp))
         if (isPrivate) {
             TIcon(Tabler.Spy, null, tint = palette.accent, size = 44.dp)
             Spacer(Modifier.height(12.dp))
@@ -73,6 +76,12 @@ fun HomeScreen(app: DriftwoodApp, isPrivate: Boolean, onOpen: (String) -> Unit) 
                 textAlign = TextAlign.Center,
             )
         } else {
+            // The app icon: the sand background and the log-and-waves drawing, layered.
+            Box(Modifier.size(96.dp).clip(RoundedCornerShape(28.dp))) {
+                Image(painterResource(R.drawable.ic_launcher_background), null, Modifier.fillMaxSize())
+                Image(painterResource(R.drawable.ic_launcher_foreground), null, Modifier.fillMaxSize())
+            }
+            Spacer(Modifier.height(16.dp))
             Text(
                 "Driftwood",
                 style = MaterialTheme.typography.headlineMedium,

@@ -2,6 +2,7 @@ package com.driftwood.browser.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
@@ -60,7 +61,10 @@ fun activePalette(settings: AppSettings): Palette {
 @Composable
 fun DriftwoodTheme(palette: Palette, content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalPalette provides palette) {
-        MaterialTheme(colorScheme = palette.toColorScheme(), typography = AppTypography, content = content)
+        MaterialTheme(colorScheme = palette.toColorScheme(), typography = AppTypography) {
+            // Text and icons without their own colour use the theme text colour (light on dark themes).
+            CompositionLocalProvider(LocalContentColor provides palette.text, content = content)
+        }
     }
 }
 

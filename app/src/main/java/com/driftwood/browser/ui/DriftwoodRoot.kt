@@ -25,12 +25,12 @@ import com.driftwood.browser.ui.library.DownloadsScreen
 import com.driftwood.browser.ui.library.HistoryScreen
 import com.driftwood.browser.ui.passwords.PasswordsScreen
 import com.driftwood.browser.ui.settings.SettingsScreen
-import com.driftwood.browser.ui.stats.StatsScreen
+import com.driftwood.browser.ui.stats.AdBlockingScreen
 import com.driftwood.browser.ui.tabs.TabsScreen
 import com.driftwood.browser.ui.theme.DriftwoodTheme
 import com.driftwood.browser.ui.theme.activePalette
 
-enum class Screen { BROWSER, TABS, BOOKMARKS, HISTORY, DOWNLOADS, SETTINGS, EXTENSIONS, PASSWORDS, STATS }
+enum class Screen { BROWSER, TABS, BOOKMARKS, HISTORY, DOWNLOADS, SETTINGS, EXTENSIONS, PASSWORDS, ADBLOCK }
 
 @Composable
 fun DriftwoodRoot(activity: MainActivity) {
@@ -89,7 +89,7 @@ fun DriftwoodRoot(activity: MainActivity) {
                     Screen.SETTINGS -> SettingsScreen(app, back) { screen = it }
                     Screen.EXTENSIONS -> ExtensionsScreen(app, back, openNewTab)
                     Screen.PASSWORDS -> PasswordsScreen(activity, app, back)
-                    Screen.STATS -> StatsScreen(app, back)
+                    Screen.ADBLOCK -> AdBlockingScreen(app, back)
                     Screen.BROWSER -> Unit
                 }
             }

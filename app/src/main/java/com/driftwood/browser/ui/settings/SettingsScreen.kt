@@ -107,7 +107,7 @@ fun SettingsScreen(app: DriftwoodApp, onBack: () -> Unit, navigate: (Screen) -> 
             }
 
             SectionHeader("Privacy & ad blocking")
-            ListRow("Blocking stats", "Ads and trackers blocked so far", Tabler.ShieldCheck, onClick = { navigate(Screen.STATS) })
+            ListRow("Ad blocking", "Turn it on or off, and see what was blocked", Tabler.ShieldCheck, onClick = { navigate(Screen.ADBLOCK) })
             ListRow("Extensions", "uBlock Origin and other Firefox add-ons", Tabler.Puzzle, onClick = { navigate(Screen.EXTENSIONS) })
             ListRow("Clear cookies and site data", "Signs you out of websites", Tabler.Trash, onClick = {
                 app.prompts.confirm("Clear cookies and site data?", "You'll be signed out of most websites.", "Clear") {

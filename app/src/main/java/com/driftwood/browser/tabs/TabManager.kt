@@ -149,7 +149,7 @@ class TabManager(private val app: DriftwoodApp) {
         val session = GeckoSession(
             GeckoSessionSettings.Builder()
                 .usePrivateMode(tab.isPrivate)
-                .useTrackingProtection(true)
+                .useTrackingProtection(app.settings.current.trackingProtection)
                 .build(),
         )
         session.setNavigationDelegate(navigationDelegate(tab))

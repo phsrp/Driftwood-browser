@@ -16,20 +16,30 @@ object Engine {
             .extensionsWebAPIEnabled(true)
             .loginAutofillEnabled(true)
             .consoleOutput(false)
-            // Firefox's standard tracking protection, plus cryptominer and fingerprinter blocking.
-            .contentBlocking(
-                ContentBlocking.Settings.Builder()
-                    .antiTracking(
-                        ContentBlocking.AntiTracking.DEFAULT or
-                            ContentBlocking.AntiTracking.CRYPTOMINING or
-                            ContentBlocking.AntiTracking.FINGERPRINTING,
-                    )
-                    .build(),
-            )
             .build()
         val runtime = GeckoRuntime.create(app, settings)
+        setTrackingProtection(runtime, app.settings.current.trackingProtection)
         runtime.setAutocompleteStorageDelegate(LoginStorage(app))
         return runtime
+    }
+
+    /**
+     * Firefox's built-in tracking protection: the standard list plus cryptominers and
+     * fingerprinters when on, nothing when off. Takes effect for the next page load.
+     */
+    fun setTrackingProtection(runtime: GeckoRuntime, enabled: Boolean) {
+        val blocking = runtime.settings.contentBlocking
+        if (enabled) {
+            blocking.setEnhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.DEFAULT)
+            blocking.setAntiTracking(
+                ContentBlocking.AntiTracking.DEFAULT or
+                    ContentBlocking.AntiTracking.CRYPTOMINING or
+                    ContentBlocking.AntiTracking.FINGERPRINTING,
+            )
+        } else {
+            blocking.setEnhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.NONE)
+            blocking.setAntiTracking(ContentBlocking.AntiTracking.NONE)
+        }
     }
 }
 
