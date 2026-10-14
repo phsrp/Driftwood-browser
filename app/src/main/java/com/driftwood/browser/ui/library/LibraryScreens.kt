@@ -173,7 +173,7 @@ fun DownloadsScreen(app: DriftwoodApp, onBack: () -> Unit) {
                     subtitle = Formatter.formatShortFileSize(context, download.size) + " · " +
                         DateUtils.getRelativeTimeSpanString(download.created),
                     icon = Tabler.File,
-                    onClick = { app.downloader.open(download.uri, download.mime) },
+                    onClick = { app.downloader.open(download.uri, download.mime, download.name) },
                 ) {
                     IconBtn(Tabler.X, "Remove from list", { app.downloads.delete(download.id) }, tint = LocalPalette.current.subtle)
                 }

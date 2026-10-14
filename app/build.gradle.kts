@@ -17,7 +17,7 @@ fun signingValue(env: String, prop: String): String? =
     System.getenv(env)?.takeIf { it.isNotBlank() } ?: signingProps.getProperty(prop)
 
 val keystorePath = signingValue("DRIFTWOOD_KEYSTORE_PATH", "storeFile")
-val appVersion = "1.0.1"
+val appVersion = "1.0.2"
 
 val hasReleaseKey = keystorePath != null && rootProject.file(keystorePath).exists()
 

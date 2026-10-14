@@ -1,3 +1,3 @@
-- Dark themes now show light text everywhere (it stayed black on some screens)
-- "Blocking stats" is now "Ad blocking", with switches to turn uBlock Origin and Firefox tracking protection on or off
-- The homepage shows the Driftwood icon above the name
+- Downloaded apps (.apk files) now open Android's installer. The first time, Driftwood asks you to turn on "Allow from this source"
+- Files from sites that don't say what type they are (like GitHub releases) keep their real name and type
+- New download bar above the address bar: progress, percentage and size, with Cancel while downloading and Open when it's done

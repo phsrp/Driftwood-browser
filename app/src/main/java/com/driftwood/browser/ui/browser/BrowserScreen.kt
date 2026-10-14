@@ -127,6 +127,8 @@ fun BrowserScreen(activity: MainActivity, navigate: (Screen) -> Unit) {
             }
             // Drawn over the page edge next to the bar, so the page doesn't jump.
             ProgressLine(tab, Modifier.align(if (barOnTop) Alignment.TopCenter else Alignment.BottomCenter))
+            // Download progress floats over the page, next to the address bar.
+            DownloadBar(app, Modifier.align(if (barOnTop) Alignment.TopCenter else Alignment.BottomCenter))
         }
         if (!barOnTop) bar()
     }
