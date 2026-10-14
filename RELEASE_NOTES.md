@@ -1,0 +1,8 @@
+- First release of Driftwood, a minimal Android browser built on Firefox's engine (GeckoView)
+- uBlock Origin installs automatically the first time you open the app, and other Firefox extensions can be added from Settings → Extensions
+- Blocking stats: how many ads and trackers were blocked, in total and on the current page
+- Tabs, incognito tabs, bookmarks, history, downloads and a homepage with your own shortcuts
+- Address bar at the bottom (hides when scrolling down) or at the top (hides when scrolling up)
+- Google, DuckDuckGo or Bing search
+- Themes: Gruvbox Dark, Gruvbox Light, Rosé Pine and Rosé Pine Dawn, or follow your phone's light/dark mode
+- Import bookmarks and passwords from Chrome; passwords are encrypted and need your fingerprint or PIN to view

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Driftwood app icon, foreground layer.
+     A driftwood log with a branch, drifting over two waves. Drawn on a 108x108
+     grid, the size Android expects for adaptive icons. The drawing is centred
+     on (54, 54). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- The driftwood log -->
+    <path
+        android:pathData="M27,56 Q51,40 81,34"
+        android:strokeColor="#5B4636"
+        android:strokeWidth="10"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- The branch sticking out of the log -->
+    <path
+        android:pathData="M52,43 Q55,34 62,26"
+        android:strokeColor="#5B4636"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Wave 1 -->
+    <path
+        android:pathData="M22,70 Q32,62 44,70 T66,70 T86,70"
+        android:strokeColor="#6F9A9E"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Wave 2 -->
+    <path
+        android:pathData="M32,82 Q42,74 54,82 T76,82"
+        android:strokeColor="#6F9A9E"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

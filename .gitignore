@@ -1,0 +1,23 @@
+# Local build tools (Java, Android SDK, Gradle) live here and are never uploaded.
+.tools/
+
+# Build output
+build/
+.gradle/
+.kotlin/
+*.apk
+*.aab
+
+# Machine-specific settings
+local.properties
+.idea/
+*.iml
+
+# Signing key: never upload. It is stored as a GitHub secret instead.
+*.jks
+*.keystore
+signing/
+
+# Local notes for Claude (not uploaded), like in the editor project
+CLAUDE.md
+.claude/
