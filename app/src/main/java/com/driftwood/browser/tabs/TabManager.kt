@@ -3,11 +3,13 @@ package com.driftwood.browser.tabs
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.driftwood.browser.DriftwoodApp
+import com.driftwood.browser.autofill.DomainMatcher
 import com.driftwood.browser.engine.PromptUi
 import org.json.JSONArray
 import org.json.JSONObject
@@ -189,6 +191,9 @@ class TabManager(private val app: DriftwoodApp) {
             request: GeckoSession.NavigationDelegate.LoadRequest,
         ): GeckoResult<AllowOrDeny>? {
             val scheme = request.uri.substringBefore(':').lowercase()
+            if ((scheme == "http" || scheme == "https") && shouldTryApp(tab, request) && openInApp(request.uri)) {
+                return GeckoResult.fromValue(AllowOrDeny.DENY)
+            }
             if (scheme in browserSchemes) return null
             // tel:, mailto:, intent:, market:, app links... hand them to Android.
             openInOtherApp(tab, request.uri)
@@ -274,6 +279,32 @@ class TabManager(private val app: DriftwoodApp) {
         if (tab.id == currentId) {
             fullScreen = false
             select(tab)
+        }
+    }
+
+    /**
+     * Only for links you tap on a page that lead to a different site (typed addresses and
+     * links within the same site stay in Driftwood), and never in incognito tabs.
+     */
+    private fun shouldTryApp(tab: Tab, request: GeckoSession.NavigationDelegate.LoadRequest): Boolean {
+        if (!app.settings.current.openLinksInApps || tab.isPrivate) return false
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return false
+        if (request.isDirectNavigation || !request.hasUserGesture) return false
+        val target = DomainMatcher.host(request.uri) ?: return false
+        return target != DomainMatcher.host(tab.url)
+    }
+
+    /** Opens the link in an installed app (like Reddit). False if only browsers can open it. */
+    private fun openInApp(uri: String): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return false
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+            .addCategory(Intent.CATEGORY_BROWSABLE)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER)
+        return try {
+            app.startActivity(intent)
+            true
+        } catch (e: ActivityNotFoundException) {
+            false
         }
     }
 

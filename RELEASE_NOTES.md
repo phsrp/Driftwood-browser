@@ -1,3 +1,2 @@
-- Downloaded apps (.apk files) now open Android's installer. The first time, Driftwood asks you to turn on "Allow from this source"
-- Files from sites that don't say what type they are (like GitHub releases) keep their real name and type
-- New download bar above the address bar: progress, percentage and size, with Cancel while downloading and Open when it's done
+- Links open in their app when it's installed: tap a Reddit, YouTube or similar link on a page and the app opens instead. Typed addresses, links within the same site and incognito tabs stay in Driftwood. Turn it off in Settings → Links
+- Smoother scrolling: the address bar now slides over the page instead of resizing it, which caused small stutters when it showed or hid

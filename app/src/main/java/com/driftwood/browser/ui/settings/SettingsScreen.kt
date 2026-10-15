@@ -81,6 +81,17 @@ fun SettingsScreen(app: DriftwoodApp, onBack: () -> Unit, navigate: (Screen) -> 
                 app.settings.update { it.copy(barPosition = BarPosition.TOP) }
             }
 
+            SectionHeader("Links")
+            ListRow("Open links in apps", "Links to Reddit, YouTube and others open in their app if it's installed", Tabler.ExternalLink, onClick = {
+                app.settings.update { it.copy(openLinksInApps = !it.openLinksInApps) }
+            }) {
+                Switch(
+                    checked = settings.openLinksInApps,
+                    onCheckedChange = { on -> app.settings.update { it.copy(openLinksInApps = on) } },
+                    colors = SwitchDefaults.colors(checkedTrackColor = palette.accent, checkedThumbColor = palette.onAccent),
+                )
+            }
+
             SectionHeader("Theme")
             ListRow("Follow phone's light/dark mode", "Pick a light and a dark theme below", Tabler.Palette, onClick = {
                 app.settings.update { it.copy(followSystem = !it.followSystem) }

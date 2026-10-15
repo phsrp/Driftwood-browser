@@ -1,16 +1,15 @@
 package com.driftwood.browser.ui.browser
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
@@ -18,11 +17,17 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -39,6 +44,7 @@ import com.driftwood.browser.ui.home.HomeScreen
 import com.driftwood.browser.ui.theme.LocalPalette
 import org.mozilla.geckoview.GeckoView
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Composable
 fun BrowserScreen(activity: MainActivity, navigate: (Screen) -> Unit) {
@@ -94,11 +100,64 @@ fun BrowserScreen(activity: MainActivity, navigate: (Screen) -> Unit) {
         }
     }
 
-    val bar = @Composable {
-        AnimatedVisibility(
-            visible = !fullScreen && (barVisible || editing || tab.showHome),
-            enter = expandVertically(),
-            exit = shrinkVertically(),
+    // The bar slides over the page instead of resizing it. Resizing made Firefox lay the
+    // page out again on every animation frame, which is what caused the stutter.
+    var barHeight by remember { mutableIntStateOf(0) }
+    val showBar = !fullScreen && (barVisible || editing || tab.showHome)
+    val shown = animateFloatAsState(if (showBar) 1f else 0f, tween(180), label = "bar")
+    val density = LocalDensity.current
+    val barHeightDp = with(density) { barHeight.toDp() }
+
+    // Tell Firefox how tall the bar is and how much of the page bottom it covers right now,
+    // so things fixed to the bottom of a page (cookie banners, chat buttons) stay visible.
+    LaunchedEffect(barHeight, fullScreen) { geckoView.setDynamicToolbarMaxHeight(if (fullScreen) 0 else barHeight) }
+    LaunchedEffect(barOnTop) {
+        snapshotFlow { (barHeight * shown.value).roundToInt() }.collect { visible ->
+            geckoView.setVerticalClipping(if (barOnTop) 0 else -visible)
+        }
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(palette.background)
+            .then(if (fullScreen) Modifier else Modifier.systemBarsPadding())
+            .imePadding()
+            .clipToBounds(),
+    ) {
+        AndroidView(
+            factory = { geckoView },
+            modifier = Modifier
+                .fillMaxSize()
+                // With the bar on top, the page moves down with it (like Firefox does).
+                .graphicsLayer { translationY = if (barOnTop) barHeight * shown.value else 0f },
+        )
+        if (tab.showHome) {
+            Box(Modifier.fillMaxSize().padding(top = if (barOnTop) barHeightDp else 0.dp, bottom = if (barOnTop) 0.dp else barHeightDp)) {
+                HomeScreen(app = app, isPrivate = tab.isPrivate, onOpen = { url ->
+                    focusManager.clearFocus()
+                    tabs.load(tab, url)
+                })
+            }
+        }
+
+        // The loading line and download cards sit right next to the bar and move with it.
+        val edge = if (barOnTop) Alignment.TopCenter else Alignment.BottomCenter
+        val followBar = Modifier.graphicsLayer {
+            val offset = barHeight * shown.value
+            translationY = if (barOnTop) offset else -offset
+        }
+        Box(Modifier.align(edge).then(followBar)) { ProgressLine(tab, Modifier) }
+        DownloadBar(app, Modifier.align(edge).then(followBar))
+
+        Box(
+            Modifier
+                .align(edge)
+                .onSizeChanged { barHeight = it.height }
+                .graphicsLayer {
+                    val hidden = size.height * (1f - shown.value)
+                    translationY = if (barOnTop) -hidden else hidden
+                },
         ) {
             AddressBar(
                 activity = activity,
@@ -107,30 +166,6 @@ fun BrowserScreen(activity: MainActivity, navigate: (Screen) -> Unit) {
                 navigate = navigate,
             )
         }
-    }
-
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(palette.background)
-            .then(if (fullScreen) Modifier else Modifier.systemBarsPadding())
-            .imePadding(),
-    ) {
-        if (barOnTop) bar()
-        Box(Modifier.weight(1f).fillMaxWidth()) {
-            AndroidView(factory = { geckoView }, modifier = Modifier.fillMaxSize())
-            if (tab.showHome) {
-                HomeScreen(app = app, isPrivate = tab.isPrivate, onOpen = { url ->
-                    focusManager.clearFocus()
-                    tabs.load(tab, url)
-                })
-            }
-            // Drawn over the page edge next to the bar, so the page doesn't jump.
-            ProgressLine(tab, Modifier.align(if (barOnTop) Alignment.TopCenter else Alignment.BottomCenter))
-            // Download progress floats over the page, next to the address bar.
-            DownloadBar(app, Modifier.align(if (barOnTop) Alignment.TopCenter else Alignment.BottomCenter))
-        }
-        if (!barOnTop) bar()
     }
 }
 

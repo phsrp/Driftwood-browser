@@ -18,6 +18,8 @@ data class AppSettings(
     val darkTheme: ThemeId = ThemeId.ROSE_PINE,
     /** Firefox's built-in tracking protection (separate from uBlock Origin). */
     val trackingProtection: Boolean = true,
+    /** Links to sites with an installed app (Reddit, YouTube...) open in that app. */
+    val openLinksInApps: Boolean = true,
 )
 
 /** User settings, plus a few internal flags. Stored in SharedPreferences. */
@@ -40,6 +42,7 @@ class SettingsStore(context: Context) {
             .putString("light_theme", next.lightTheme.name)
             .putString("dark_theme", next.darkTheme.name)
             .putBoolean("tracking_protection", next.trackingProtection)
+            .putBoolean("open_in_apps", next.openLinksInApps)
             .apply()
     }
 
@@ -53,6 +56,7 @@ class SettingsStore(context: Context) {
             lightTheme = enumOr(prefs.getString("light_theme", null), d.lightTheme),
             darkTheme = enumOr(prefs.getString("dark_theme", null), d.darkTheme),
             trackingProtection = prefs.getBoolean("tracking_protection", d.trackingProtection),
+            openLinksInApps = prefs.getBoolean("open_in_apps", d.openLinksInApps),
         )
     }
 
