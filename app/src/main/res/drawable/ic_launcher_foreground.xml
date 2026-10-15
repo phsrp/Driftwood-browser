@@ -9,6 +9,13 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
+    <!-- Scaled to two-thirds around the centre so launchers that crop tightly keep a margin. -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.66"
+        android:scaleY="0.66">
+
     <!-- The driftwood log -->
     <path
         android:pathData="M27,56 Q51,40 81,34"
@@ -40,4 +47,5 @@
         android:strokeWidth="5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
+    </group>
 </vector>

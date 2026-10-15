@@ -1,2 +1,1 @@
-- Links open in their app when it's installed: tap a Reddit, YouTube or similar link on a page and the app opens instead. Typed addresses, links within the same site and incognito tabs stay in Driftwood. Turn it off in Settings → Links
-- Smoother scrolling: the address bar now slides over the page instead of resizing it, which caused small stutters when it showed or hid
+- Smaller app icon drawing, so the log and waves no longer fill the whole icon on your home screen
